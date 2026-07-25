@@ -1,0 +1,308 @@
+{
+  "engagement": "evidence",
+  "generated_at": "2026-07-25T00:34:39+00:00",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-5-20250929",
+  "scope_note": "Design/documentation testing only: assesses whether each control is adequately documented in the provided policies. Does not test operating effectiveness (sampling, record-level testing). A 'documented' verdict is not an operating-effectiveness pass.",
+  "summary": {
+    "total": 12,
+    "documented": 8,
+    "partially_documented": 2,
+    "not_found": 2
+  },
+  "assessments": [
+    {
+      "control_id": "CC1.1",
+      "title": "Code of conduct",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The HR Security Policy explicitly requires employees to acknowledge the Code of Conduct both upon hire and annually thereafter, satisfying both requirement parts of the control.",
+      "evidence": [
+        {
+          "requirement_part": "employees acknowledge a code of conduct upon hire",
+          "citation": {
+            "source": "hr-security-policy.md",
+            "anchor": "§1. Code of Conduct",
+            "exact_quote": "All employees must review and acknowledge the company Code of Conduct upon hire and annually thereafter."
+          }
+        },
+        {
+          "requirement_part": "the code of conduct is re-acknowledged annually",
+          "citation": {
+            "source": "hr-security-policy.md",
+            "anchor": "§1. Code of Conduct",
+            "exact_quote": "All employees must review and acknowledge the company Code of Conduct upon hire and annually thereafter."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC1.3",
+      "title": "Background screening",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The onboarding-policy.md document explicitly states that employment offers are contingent on background checks appropriate to the role. Section §2.1 directly supports both requirement parts: it confirms that a background check is performed for new employees (by making offers contingent on completion) and that the check is appropriate to the role.",
+      "evidence": [
+        {
+          "requirement_part": "a background check is performed for new employees",
+          "citation": {
+            "source": "onboarding-policy.md",
+            "anchor": "§2. Background Screening",
+            "exact_quote": "All offers of employment are contingent on the successful completion of a background check appropriate to the role."
+          }
+        },
+        {
+          "requirement_part": "the check is appropriate to the role",
+          "citation": {
+            "source": "onboarding-policy.md",
+            "anchor": "§2. Background Screening",
+            "exact_quote": "All offers of employment are contingent on the successful completion of a background check appropriate to the role."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC1.4",
+      "title": "Security awareness training",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The onboarding-policy.md document explicitly requires security awareness training for all new hires and specifies a 30-day completion window from the start of employment. Both requirement parts are satisfied by the policy language in §4.2.",
+      "evidence": [
+        {
+          "requirement_part": "security awareness training is required for employees",
+          "citation": {
+            "source": "onboarding-policy.md",
+            "anchor": "§4. Security Awareness Training",
+            "exact_quote": "All new hires must complete the Security Awareness course through the LMS within their first 30 days of employment."
+          }
+        },
+        {
+          "requirement_part": "training must be completed within 30 days of hire",
+          "citation": {
+            "source": "onboarding-policy.md",
+            "anchor": "§4. Security Awareness Training",
+            "exact_quote": "All new hires must complete the Security Awareness course through the LMS within their first 30 days of employment."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC2.1",
+      "title": "Incident response plan",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The incident-response-policy.md document explicitly states that Northwind maintains a documented incident response plan (§1.1) and that the plan is reviewed and updated at least annually (§1.2). Both requirement parts are directly satisfied by these provisions.",
+      "evidence": [
+        {
+          "requirement_part": "a documented incident response plan exists",
+          "citation": {
+            "source": "incident-response-policy.md",
+            "anchor": "§1. Incident Response Plan",
+            "exact_quote": "Northwind maintains a documented incident response plan that defines severity levels, roles and responsibilities, and communication procedures for security incidents."
+          }
+        },
+        {
+          "requirement_part": "the plan is reviewed at least annually",
+          "citation": {
+            "source": "incident-response-policy.md",
+            "anchor": "§1. Incident Response Plan",
+            "exact_quote": "The incident response plan is reviewed and updated at least annually."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC6.1",
+      "title": "Periodic access reviews",
+      "verdict": "partially_documented",
+      "confidence": 0.62,
+      "coverage_matched": 1,
+      "coverage_total": 2,
+      "rationale": "The access-control-policy.md document confirms that user access to production systems is reviewed periodically (§2.1), satisfying the first requirement part. However, no document specifies a quarterly (or more frequent, explicitly defined) review cadence for access reviews. The term \"periodically\" is too vague to satisfy the second requirement part. Note that data-protection-policy.md mentions quarterly vulnerability scans, but that is unrelated to access reviews.",
+      "evidence": [
+        {
+          "requirement_part": "user access to production is reviewed",
+          "citation": {
+            "source": "access-control-policy.md",
+            "anchor": "§2. Access Reviews",
+            "exact_quote": "Management reviews user access to production systems periodically to\nconfirm that access remains appropriate for each user's role."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC6.2",
+      "title": "Multi-factor authentication",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "Section §3.1 of the Access Control Policy explicitly states that multi-factor authentication is required for all access to production systems, satisfying both requirement parts.",
+      "evidence": [
+        {
+          "requirement_part": "multi-factor authentication is required",
+          "citation": {
+            "source": "access-control-policy.md",
+            "anchor": "§3. Authentication",
+            "exact_quote": "Multi-factor authentication is required for all access to production\nsystems."
+          }
+        },
+        {
+          "requirement_part": "it applies to access to production systems",
+          "citation": {
+            "source": "access-control-policy.md",
+            "anchor": "§3. Authentication",
+            "exact_quote": "Multi-factor authentication is required for all access to production\nsystems."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC6.3",
+      "title": "Access revocation on termination",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The access-control-policy.md document explicitly states that IT revokes access to all systems upon termination within 24 hours of the effective end date, satisfying both requirement parts for this control.",
+      "evidence": [
+        {
+          "requirement_part": "access is revoked upon termination",
+          "citation": {
+            "source": "access-control-policy.md",
+            "anchor": "§4. Termination",
+            "exact_quote": "Upon termination of employment, IT revokes the departing user's access to all systems within 24 hours of the effective end date."
+          }
+        },
+        {
+          "requirement_part": "revocation occurs within 24 hours",
+          "citation": {
+            "source": "access-control-policy.md",
+            "anchor": "§4. Termination",
+            "exact_quote": "Upon termination of employment, IT revokes the departing user's access to all systems within 24 hours of the effective end date."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC6.6",
+      "title": "Encryption in transit",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The data-protection-policy.md document contains an explicit statement in §1.1 that addresses both requirement parts: it confirms that data transmitted over public networks is encrypted and specifies the use of TLS 1.2 or higher. This single passage satisfies both parts of the control requirement.",
+      "evidence": [
+        {
+          "requirement_part": "data in transit over public networks is encrypted",
+          "citation": {
+            "source": "data-protection-policy.md",
+            "anchor": "§1. Encryption in Transit",
+            "exact_quote": "All data transmitted over public networks is encrypted using TLS 1.2 or higher."
+          }
+        },
+        {
+          "requirement_part": "encryption uses TLS 1.2 or higher",
+          "citation": {
+            "source": "data-protection-policy.md",
+            "anchor": "§1. Encryption in Transit",
+            "exact_quote": "All data transmitted over public networks is encrypted using TLS 1.2 or higher."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC6.7",
+      "title": "Encryption at rest with key management",
+      "verdict": "partially_documented",
+      "confidence": 0.62,
+      "coverage_matched": 1,
+      "coverage_total": 2,
+      "rationale": "The data-protection-policy.md document states that sensitive customer data is protected using encryption, which satisfies the first requirement part. However, none of the provided documents contain any explicit statement about encryption key management or rotation, so the second requirement part is not satisfied.",
+      "evidence": [
+        {
+          "requirement_part": "sensitive data is encrypted at rest",
+          "citation": {
+            "source": "data-protection-policy.md",
+            "anchor": "§2. Encryption at Rest",
+            "exact_quote": "Sensitive customer data is protected using encryption."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC7.1",
+      "title": "Vulnerability scanning cadence",
+      "verdict": "documented",
+      "confidence": 0.95,
+      "coverage_matched": 2,
+      "coverage_total": 2,
+      "rationale": "The data-protection-policy.md explicitly states that production systems are monitored for vulnerabilities and that automated vulnerability scans are performed at least quarterly, satisfying both requirement parts for design/documentation testing.",
+      "evidence": [
+        {
+          "requirement_part": "systems are scanned or monitored for vulnerabilities",
+          "citation": {
+            "source": "data-protection-policy.md",
+            "anchor": "§3. Vulnerability Management",
+            "exact_quote": "Production systems are monitored for known vulnerabilities, and identified issues are remediated by the engineering team."
+          }
+        },
+        {
+          "requirement_part": "scanning occurs on a defined periodic cadence",
+          "citation": {
+            "source": "data-protection-policy.md",
+            "anchor": "§3. Vulnerability Management",
+            "exact_quote": "Automated vulnerability scans are performed on at least a quarterly basis."
+          }
+        }
+      ],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC7.2",
+      "title": "Annual independent penetration testing",
+      "verdict": "not_found",
+      "confidence": 0.6,
+      "coverage_matched": 0,
+      "coverage_total": 3,
+      "rationale": "None of the provided policy documents contain any reference to penetration testing. The documents cover access control, data protection, HR security, incident response, and onboarding, but do not establish requirements for penetration testing, its frequency, or tester independence.",
+      "evidence": [],
+      "rejected_citations": 0
+    },
+    {
+      "control_id": "CC9.1",
+      "title": "Vendor risk management",
+      "verdict": "not_found",
+      "confidence": 0.6,
+      "coverage_matched": 0,
+      "coverage_total": 2,
+      "rationale": "None of the provided policy documents (access-control-policy.md, data-protection-policy.md, hr-security-policy.md, incident-response-policy.md, or onboarding-policy.md) contain any provisions regarding third-party vendor security risk assessment or vendor management. The documents focus on employee access controls, data protection, HR security, incident response, and employee onboarding, but do not address vendor risk management.",
+      "evidence": [],
+      "rejected_citations": 0
+    }
+  ],
+  "evidence_documents": {
+    "access-control-policy.md": "# Northwind Systems — Access Control Policy\n\n_Fictional sample document for testing. Not a real company._\n\n## §2. Access Reviews\n\n§2.1 Management reviews user access to production systems periodically to\nconfirm that access remains appropriate for each user's role.\n\n§2.2 Access that is no longer required is revoked following the review.\n\n## §3. Authentication\n\n§3.1 Multi-factor authentication is required for all access to production\nsystems.\n\n## §4. Termination\n\n§4.1 Upon termination of employment, IT revokes the departing user's access to\nall systems within 24 hours of the effective end date.\n",
+    "data-protection-policy.md": "# Northwind Systems — Data Protection Policy\n\n_Fictional sample document for testing. Not a real company._\n\n## §1. Encryption in Transit\n\n§1.1 All data transmitted over public networks is encrypted using TLS 1.2 or\nhigher.\n\n## §2. Encryption at Rest\n\n§2.1 Sensitive customer data is protected using encryption.\n\n## §3. Vulnerability Management\n\n§3.1 Production systems are monitored for known vulnerabilities, and identified\nissues are remediated by the engineering team.\n\n§3.2 Automated vulnerability scans are performed on at least a quarterly basis.\n",
+    "hr-security-policy.md": "# Northwind Systems — HR Security Policy\n\n_Fictional sample document for testing. Not a real company._\n\n## §1. Code of Conduct\n\n§1.1 All employees must review and acknowledge the company Code of Conduct upon\nhire and annually thereafter.\n\n## §2. Confidentiality\n\n§2.1 All employees sign a confidentiality agreement covering the handling of\ncustomer and company data.\n",
+    "incident-response-policy.md": "# Northwind Systems — Incident Response Policy\n\n_Fictional sample document for testing. Not a real company._\n\n## §1. Incident Response Plan\n\n§1.1 Northwind maintains a documented incident response plan that defines\nseverity levels, roles and responsibilities, and communication procedures for\nsecurity incidents.\n\n§1.2 The incident response plan is reviewed and updated at least annually.\n\n## §2. Reporting\n\n§2.1 All employees are required to report suspected security incidents to the\nsecurity team without delay.\n",
+    "onboarding-policy.md": "# Northwind Systems — Employee Onboarding Policy\n\n_Fictional sample document for testing. Not a real company._\n\n## §1. Purpose\n\nThis policy defines the steps required to onboard new employees at Northwind\nSystems, including account provisioning and required training.\n\n## §2. Background Screening\n\n§2.1 All offers of employment are contingent on the successful completion of a\nbackground check appropriate to the role.\n\n## §4. Security Awareness Training\n\n§4.1 Security is everyone's responsibility. All personnel are expected to\nunderstand the company's information security practices.\n\n§4.2 All new hires must complete the Security Awareness course through the LMS\nwithin their first 30 days of employment. Completion is tracked by People Ops\nand is a condition of continued system access.\n\n## §5. Account Provisioning\n\n§5.1 IT provisions accounts on the employee's start date based on their role,\nfollowing the principle of least privilege.\n"
+  }
+}

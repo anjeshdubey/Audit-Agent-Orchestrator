@@ -1,0 +1,30 @@
+{
+  "engagement": "Northwind Systems — FY2025 (prior year)",
+  "note": "Seed data for institutional memory (Phase 4). These are human-approved conclusions from a prior engagement. Not used by the MVP; retrieved later to ground current-year testing in how this team concluded before.",
+  "concluded_controls": [
+    {
+      "control_id": "CC6.1",
+      "title": "Periodic access reviews",
+      "verdict": "partially_documented",
+      "evidence_quote": "Access reviews are performed periodically by system owners.",
+      "reviewer_reasoning": "Prior year we accepted 'periodically' as a partial only — the team's standard is that access-review controls require an explicit quarterly (or tighter) cadence to be considered fully documented. 'Periodically' does not establish frequency.",
+      "conclusion": "Partial — documented that reviews occur, but no defined cadence. Same treatment expected in the current year unless the policy now names a frequency."
+    },
+    {
+      "control_id": "CC6.3",
+      "title": "Access revocation on termination",
+      "verdict": "documented",
+      "evidence_quote": "Access is revoked within one business day of termination.",
+      "reviewer_reasoning": "Prior year the policy said 'one business day'; the team accepted that as meeting the 24-hour requirement. Treat an explicit sub-24-hour or one-business-day commitment as sufficient.",
+      "conclusion": "Documented. The bar the team set: a specific, bounded revocation window (<= 24h or one business day)."
+    },
+    {
+      "control_id": "CC7.2",
+      "title": "Annual independent penetration testing",
+      "verdict": "not_found",
+      "evidence_quote": null,
+      "reviewer_reasoning": "No penetration testing policy existed in the prior year either; this was raised as a documentation gap in the FY2025 report.",
+      "conclusion": "Not found — recurring gap. Expect to raise again if still undocumented."
+    }
+  ]
+}

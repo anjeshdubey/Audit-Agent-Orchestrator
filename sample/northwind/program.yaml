@@ -1,0 +1,131 @@
+# Northwind Systems — sample control program (SOC 2-flavored, fictional).
+#
+# Each control declares the distinct parts of its requirement. The agent
+# reports which parts the evidence covers; code turns coverage + a verified
+# citation into the verdict and confidence. The set is tuned to exercise the
+# full verdict range: documented / partially_documented / not_found.
+
+- id: CC1.1
+  title: Code of conduct
+  requirement: >
+    Employees acknowledge a code of conduct upon hire and annually thereafter.
+  requirement_parts:
+    - "employees acknowledge a code of conduct upon hire"
+    - "the code of conduct is re-acknowledged annually"
+  test_procedure: >
+    Confirm a policy requires code-of-conduct acknowledgement at hire and on an
+    annual basis.
+
+- id: CC1.3
+  title: Background screening
+  requirement: >
+    Employment offers are contingent on a background check appropriate to the role.
+  requirement_parts:
+    - "a background check is performed for new employees"
+    - "the check is appropriate to the role"
+  test_procedure: >
+    Confirm a policy requires role-appropriate background screening before hire.
+
+- id: CC1.4
+  title: Security awareness training
+  requirement: >
+    All employees complete security awareness training within 30 days of hire.
+  requirement_parts:
+    - "security awareness training is required for employees"
+    - "training must be completed within 30 days of hire"
+  test_procedure: >
+    Confirm a policy requires security training and specifies a completion
+    window of 30 days or fewer from the hire/start date.
+
+- id: CC2.1
+  title: Incident response plan
+  requirement: >
+    A documented incident response plan exists and is reviewed at least annually.
+  requirement_parts:
+    - "a documented incident response plan exists"
+    - "the plan is reviewed at least annually"
+  test_procedure: >
+    Confirm a documented IR plan exists and a policy requires at least annual review.
+
+- id: CC6.1
+  title: Periodic access reviews
+  requirement: >
+    User access to production is reviewed on a defined quarterly cadence.
+  requirement_parts:
+    - "user access to production is reviewed"
+    - "reviews occur on a defined quarterly cadence"
+  test_procedure: >
+    Confirm a policy requires access reviews AND specifies a quarterly (or more
+    frequent, explicitly defined) review frequency.
+
+- id: CC6.2
+  title: Multi-factor authentication
+  requirement: >
+    Multi-factor authentication is required for access to production systems.
+  requirement_parts:
+    - "multi-factor authentication is required"
+    - "it applies to access to production systems"
+  test_procedure: >
+    Confirm a policy requires MFA for production system access.
+
+- id: CC6.3
+  title: Access revocation on termination
+  requirement: >
+    Access is revoked within 24 hours of an employee's termination.
+  requirement_parts:
+    - "access is revoked upon termination"
+    - "revocation occurs within 24 hours"
+  test_procedure: >
+    Confirm a policy requires access revocation on termination within 24 hours.
+
+- id: CC6.6
+  title: Encryption in transit
+  requirement: >
+    Data transmitted over public networks is encrypted using TLS 1.2 or higher.
+  requirement_parts:
+    - "data in transit over public networks is encrypted"
+    - "encryption uses TLS 1.2 or higher"
+  test_procedure: >
+    Confirm a policy requires encryption in transit at TLS 1.2 or above.
+
+- id: CC6.7
+  title: Encryption at rest with key management
+  requirement: >
+    Sensitive data is encrypted at rest and encryption keys are managed and rotated.
+  requirement_parts:
+    - "sensitive data is encrypted at rest"
+    - "encryption keys are managed and rotated"
+  test_procedure: >
+    Confirm a policy requires encryption at rest AND defines key management/rotation.
+
+- id: CC7.1
+  title: Vulnerability scanning cadence
+  requirement: >
+    Systems are scanned for vulnerabilities on a defined periodic cadence.
+  requirement_parts:
+    - "systems are scanned or monitored for vulnerabilities"
+    - "scanning occurs on a defined periodic cadence"
+  test_procedure: >
+    Confirm a policy requires vulnerability scanning AND a defined scan frequency.
+
+- id: CC7.2
+  title: Annual independent penetration testing
+  requirement: >
+    An independent penetration test is performed at least annually.
+  requirement_parts:
+    - "a penetration test is performed"
+    - "testing occurs at least annually"
+    - "testing is performed by an independent party"
+  test_procedure: >
+    Confirm a policy requires penetration testing, an annual cadence, and tester
+    independence.
+
+- id: CC9.1
+  title: Vendor risk management
+  requirement: >
+    Third-party vendors are assessed for security risk before engagement.
+  requirement_parts:
+    - "vendors are assessed for security risk"
+    - "assessment occurs before engagement"
+  test_procedure: >
+    Confirm a policy requires security risk assessment of vendors prior to engagement.

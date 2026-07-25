@@ -34,17 +34,46 @@ documented, and where's the proof?" It deliberately does *not* do sample-based
 operating-effectiveness testing. Design testing maps cleanly onto grounded
 document extraction, which is the capability this project is about.
 
-## Status
+## How it works
 
-Early. The first spike (`spike/phase_0_5.py`) proves the core loop:
-structured extraction → citation → **deterministic quote-verification** →
-code-derived verdict and confidence, against a small synthetic sample set.
+Per control, the agent:
+
+1. **Extracts evidence** — for each part of the requirement it believes is met,
+   the model returns a *verbatim* citation (source · section · exact quote).
+2. **Verifies** — code checks each quoted passage literally exists in the named
+   source. An unverifiable quote is rejected and cannot count.
+3. **Scores in code** — the verdict (`documented` / `partially_documented` /
+   `not_found`) and a confidence score are derived from verification + how many
+   requirement parts are backed by verified evidence. The model never reports
+   its own verdict or confidence.
+
+Verification proves a citation is *authentic*, not that it's *relevant* — the
+semantic-sufficiency judgment is surfaced for a human reviewer (the
+human-in-the-loop phase), which is the whole point: the agent does the tedious
+first pass, a person signs off.
+
+## Quickstart
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e '.[groq]'          # or .[gemini] / .[together] / .[anthropic] / .[all]
+pip install -e '.[anthropic]'     # or .[groq] / .[gemini] / .[together] / .[all]
 cp .env.example .env              # set at least one provider key
-python spike/phase_0_5.py
+
+# Run the bundled Northwind sample engagement (12 controls, 5 policy docs)
+audit-orchestrator run --markdown out/workpaper.md
+
+# View the workpaper (served, not file://, so the browser can fetch the JSON)
+python -m http.server -d viewer 8000   # then open http://localhost:8000
 ```
+
+Run the deterministic-core tests with `pip install -e '.[dev]' && pytest`.
+
+## Status
+
+Testing-agent core is working end-to-end: a CLI runs a full control program
+against an evidence set and emits a workpaper (JSON + Markdown) with verified
+citations, plus a read-only viewer that highlights each cited passage inside
+its source document. The earlier `spike/phase_0_5.py` remains as the original
+proof of the core loop.
 
 All sample data is synthetic and clearly fictional — never real client data.
