@@ -59,6 +59,13 @@ class ControlAssessment(BaseModel):
         description="How many proposed citations failed verification (their "
         "quote was not found in the source) — fabrications caught.",
     )
+    error: str | None = Field(
+        default=None,
+        description="Set when extraction itself failed for this control (a "
+        "provider/SDK error, e.g. a rate limit) — distinct from a genuine "
+        "not_found determination. Verdict falls back to not_found with zero "
+        "confidence so a run failure never silently reads as a real assessment.",
+    )
 
 
 class Workpaper(BaseModel):

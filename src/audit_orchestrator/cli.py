@@ -32,6 +32,9 @@ _SYMBOLS = {"documented": "✓", "partially_documented": "~", "not_found": "✗"
 
 
 def _progress(i: int, total: int, a: ControlAssessment) -> None:
+    if a.error:
+        print(f"  [{i}/{total}] ! {a.control_id} ERRORED — {a.error}")
+        return
     print(
         f"  [{i}/{total}] {_SYMBOLS[a.verdict]} {a.control_id} "
         f"{a.verdict} (conf {a.confidence}, coverage "
@@ -69,6 +72,15 @@ def _run(args: argparse.Namespace) -> int:
         f"\nSummary: {s['documented']} documented · "
         f"{s['partially_documented']} partial · {s['not_found']} not found"
     )
+    if s.get("errored"):
+        print(
+            f"\n{s['errored']} control(s) failed to run (rate limit/timeout/etc) "
+            "and were NOT assessed — see the ERRORED lines above. The workpaper "
+            "was still written with the controls that did complete; rerun to "
+            "retry the failed ones.",
+            file=sys.stderr,
+        )
+        return 2
     return 0
 
 

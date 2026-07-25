@@ -10,7 +10,7 @@ from collections import Counter
 from datetime import datetime, timezone
 
 from .extraction import extract_evidence
-from .gateway import GatewayConfig
+from .gateway import GatewayConfig, GatewayError
 from .models import Control, ControlAssessment, EvidenceItem, Workpaper
 from .scoring import derive_verdict_and_confidence
 from .verify import verify_quote
@@ -25,8 +25,32 @@ SCOPE_NOTE = (
 
 def assess_control(
     control: Control, docs: dict[str, str], *, config: GatewayConfig | None = None
-) -> tuple[ControlAssessment, GatewayConfig]:
-    result, used_config = extract_evidence(control, docs, config=config)
+) -> tuple[ControlAssessment, GatewayConfig | None]:
+    # GatewayError only occurs when `config` is None and env resolution itself
+    # fails (no API key configured at all) — that's a setup problem, so it
+    # propagates and the whole run fails fast. Any other exception here is a
+    # transient runtime failure of THIS control's request (rate limit, 503,
+    # timeout — the exact failure class we hit live against Groq's daily cap).
+    # That must not discard every control already assessed in this run, so it
+    # is caught and turned into an errored assessment instead of a crash.
+    try:
+        result, used_config = extract_evidence(control, docs, config=config)
+    except GatewayError:
+        raise
+    except Exception as e:  # noqa: BLE001 - any provider/SDK failure, caught broadly
+        errored = ControlAssessment(
+            control_id=control.id,
+            title=control.title,
+            verdict="not_found",
+            confidence=0.0,
+            coverage_matched=0,
+            coverage_total=len(control.requirement_parts),
+            rationale=f"Extraction failed and this control was not assessed: {e}",
+            evidence=[],
+            rejected_citations=0,
+            error=str(e),
+        )
+        return errored, config
 
     # Keep only findings that (a) name a requirement part actually declared on
     # the control and (b) whose quote verifies against the source. Coverage is
@@ -100,11 +124,13 @@ def run_program(
             on_control(i, len(controls), assessment)
 
     counts = Counter(a.verdict for a in assessments)
+    errored = sum(1 for a in assessments if a.error)
     summary = {
         "total": len(assessments),
         "documented": counts.get("documented", 0),
         "partially_documented": counts.get("partially_documented", 0),
         "not_found": counts.get("not_found", 0),
+        "errored": errored,
     }
 
     return Workpaper(

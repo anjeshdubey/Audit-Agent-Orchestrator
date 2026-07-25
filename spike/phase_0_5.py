@@ -11,9 +11,14 @@ explainable signals:
     2. requirement coverage (how many of the control's requirement parts the
        evidence actually addresses)
 
-This is a throwaway script. No persistence, no UI, no retrieval — the whole
-point is to confirm a grounded, verifiable answer is reliable enough to build
-the MVP on.
+This is a superseded historical artifact, kept only to show the original,
+smaller proof of the core loop — the real, actively-maintained implementation
+is `src/audit_orchestrator/`. Deliberately imports verify_quote and
+derive_verdict_and_confidence from that package rather than keeping its own
+copies: a duplicated copy here previously drifted out of sync with a real bug
+fix in the package (an empty citation quote vacuously "verifying"), which
+means this script would otherwise silently demonstrate a known-fixed bug.
+Prefer `audit-orchestrator run` (see README) over running this directly.
 
 Run:
     python spike/phase_0_5.py
@@ -21,7 +26,6 @@ Run:
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
@@ -32,23 +36,15 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from audit_orchestrator.gateway import GatewayError, extract  # noqa: E402
+from audit_orchestrator.models import Citation  # noqa: E402
+from audit_orchestrator.scoring import derive_verdict_and_confidence  # noqa: E402
+from audit_orchestrator.verify import verify_quote  # noqa: E402
 
 SAMPLE_DIR = Path(__file__).resolve().parent / "sample"
 EVIDENCE_FILES = ["onboarding-policy.md", "access-control-policy.md"]
 
 
 # --- What we ask the model for (note: NOT the verdict, NOT the confidence) ---
-
-
-class Citation(BaseModel):
-    source: str = Field(
-        description="Exact filename of the document, e.g. 'onboarding-policy.md'."
-    )
-    anchor: str = Field(description="Section/heading the quote is under, e.g. '§4.2'.")
-    exact_quote: str = Field(
-        description="A verbatim span copied from the document — no paraphrasing, "
-        "no ellipsis. Must appear exactly as written in the source."
-    )
 
 
 class ExtractionResult(BaseModel):
@@ -75,41 +71,6 @@ SYSTEM_PROMPT = (
     "is worse than no quote. If nothing in the documents supports the control, "
     "return no citation and an empty matched_parts list."
 )
-
-
-def normalize(text: str) -> str:
-    """Collapse whitespace and lowercase for a lenient-but-honest quote check.
-
-    We tolerate whitespace and capitalization differences (models often
-    re-case a sentence's first letter) but nothing else — a paraphrase still
-    fails, which is the whole point.
-    """
-    return re.sub(r"\s+", " ", text).strip().lower()
-
-
-def verify_quote(citation: Citation, docs: dict[str, str]) -> bool:
-    """True iff the exact_quote actually appears in the cited source document."""
-    source_text = docs.get(citation.source)
-    if source_text is None:
-        return False
-    return normalize(citation.exact_quote) in normalize(source_text)
-
-
-def derive_verdict_and_confidence(
-    *, verified: bool, matched: int, total: int
-) -> tuple[str, float]:
-    """Code owns the verdict and confidence — never the model.
-
-    Confidence is built from two explainable factors, not a model's opinion:
-    a verified citation is the gate, and requirement coverage scales it.
-    """
-    coverage = matched / total if total else 0.0
-
-    if verified and coverage >= 1.0:
-        return "documented", round(0.85 + 0.10 * coverage, 2)
-    if verified and coverage > 0.0:
-        return "partially_documented", round(0.45 + 0.35 * coverage, 2)
-    return "not_found", 0.60
 
 
 def assess_control(control: dict, docs: dict[str, str]) -> dict:
