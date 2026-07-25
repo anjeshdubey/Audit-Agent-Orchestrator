@@ -1,0 +1,30 @@
+[project]
+name = "audit-orchestrator"
+version = "0.0.1"
+description = "Grounded, human-in-the-loop agent for compliance evidence review — every answer traceable to a verified source passage."
+requires-python = ">=3.11"
+dependencies = [
+    "instructor>=1.6",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# Install only the provider SDK(s) you have keys for.
+groq = ["groq>=0.11"]
+gemini = ["google-genai>=0.3"]
+together = ["openai>=1.40"]
+anthropic = ["anthropic>=0.40"]
+all = ["groq>=0.11", "google-genai>=0.3", "openai>=1.40", "anthropic>=0.40"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"

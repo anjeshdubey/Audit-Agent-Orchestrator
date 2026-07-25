@@ -1,0 +1,38 @@
+# Sample control list (SOC 2-flavored, fictional). Each control declares the
+# distinct parts of its requirement so the code can measure how much of the
+# requirement the evidence actually covers — coverage feeds the derived
+# confidence score, rather than trusting a model-reported number.
+
+- id: CC1.4
+  title: Security awareness training
+  requirement: >
+    All employees complete security awareness training within 30 days of hire.
+  requirement_parts:
+    - "security awareness training is required for employees"
+    - "training must be completed within 30 days of hire"
+  test_procedure: >
+    Confirm a policy requires security training and specifies a completion
+    window of 30 days or fewer from the hire/start date.
+
+- id: CC6.1
+  title: Periodic access reviews
+  requirement: >
+    User access to production is reviewed on a defined quarterly cadence.
+  requirement_parts:
+    - "user access to production is reviewed"
+    - "reviews occur on a defined quarterly cadence"
+  test_procedure: >
+    Confirm a policy requires access reviews AND specifies a quarterly (or
+    more frequent, explicitly defined) review frequency.
+
+- id: CC7.2
+  title: Annual penetration testing
+  requirement: >
+    An independent penetration test is performed at least annually.
+  requirement_parts:
+    - "a penetration test is performed"
+    - "testing occurs at least annually"
+    - "testing is performed by an independent party"
+  test_procedure: >
+    Confirm a policy requires penetration testing, an annual (or more frequent)
+    cadence, and independence of the tester.
