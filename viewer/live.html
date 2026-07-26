@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Audit Orchestrator — Live Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Audit Orchestrator — Live Demo</h1>
+    <p class="tagline">
+      Watch the agent work a real control list in real time. Anything
+      uncertain or failing lands in front of you before it counts.
+    </p>
+    <p class="nav"><a href="index.html">← Static workpaper viewer</a></p>
+  </header>
+
+  <main id="app">
+    <p class="loading">
+      <button id="start" class="btn">Start engagement</button>
+    </p>
+  </main>
+
+  <footer>
+    <p>
+      This server makes real LLM calls against the Northwind sample
+      engagement using whatever provider is configured in <code>.env</code> —
+      only one run at a time. The event log shows the actual pipeline steps
+      (extract → verify → score), not simulated model "thinking" — the
+      extraction call itself isn't token-streamed, so nothing here is
+      dramatized beyond what really happened.
+    </p>
+  </footer>
+
+  <script src="render.js"></script>
+  <script src="live.js"></script>
+</body>
+</html>

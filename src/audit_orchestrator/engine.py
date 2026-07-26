@@ -102,6 +102,39 @@ def assess_control(
     return assessment, used_config
 
 
+def assemble_workpaper(
+    engagement: str,
+    controls: list[Control],
+    docs: dict[str, str],
+    assessments: list[ControlAssessment],
+    *,
+    config: GatewayConfig | None = None,
+) -> Workpaper:
+    """Build the Workpaper summary from a (possibly partial, for a live run
+    still in progress) list of assessments. Shared by the CLI's straight-
+    through run and the Phase 2 live graph's incremental workpaper."""
+    counts = Counter(a.verdict for a in assessments)
+    errored = sum(1 for a in assessments if a.error)
+    summary = {
+        "total": len(controls),
+        "documented": counts.get("documented", 0),
+        "partially_documented": counts.get("partially_documented", 0),
+        "not_found": counts.get("not_found", 0),
+        "errored": errored,
+    }
+
+    return Workpaper(
+        engagement=engagement,
+        generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        provider=config.provider if config else "unknown",
+        model=config.model if config else "unknown",
+        scope_note=SCOPE_NOTE,
+        summary=summary,
+        assessments=assessments,
+        evidence_documents=docs,
+    )
+
+
 def run_program(
     engagement: str,
     controls: list[Control],
@@ -123,23 +156,6 @@ def run_program(
         if on_control:
             on_control(i, len(controls), assessment)
 
-    counts = Counter(a.verdict for a in assessments)
-    errored = sum(1 for a in assessments if a.error)
-    summary = {
-        "total": len(assessments),
-        "documented": counts.get("documented", 0),
-        "partially_documented": counts.get("partially_documented", 0),
-        "not_found": counts.get("not_found", 0),
-        "errored": errored,
-    }
-
-    return Workpaper(
-        engagement=engagement,
-        generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        provider=used_config.provider if used_config else "unknown",
-        model=used_config.model if used_config else "unknown",
-        scope_note=SCOPE_NOTE,
-        summary=summary,
-        assessments=assessments,
-        evidence_documents=docs,
+    return assemble_workpaper(
+        engagement, controls, docs, assessments, config=used_config
     )

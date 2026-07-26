@@ -68,12 +68,44 @@ python -m http.server -d viewer 8000   # then open http://localhost:8000
 
 Run the deterministic-core tests with `pip install -e '.[dev]' && pytest`.
 
+### Phase 2 — the live demo
+
+```bash
+pip install -e '.[anthropic,server]'   # adds fastapi/uvicorn/langgraph
+cp .env.example .env                   # set at least one provider key
+
+audit-orchestrator serve               # http://localhost:8000
+```
+
+Open `http://localhost:8000/live.html` and click **Start engagement**. Every
+control streams in over SSE as it's assessed; anything short of a clean,
+high-confidence `documented` verdict (partial, not-found, or an errored
+extraction) pauses the run at a real LangGraph `interrupt()` and drops into a
+review panel — approve or reject it, with an optional note, and the run
+resumes from exactly there. This is one `uvicorn` process serving both the
+API and the viewer, driving real LLM calls against whichever provider is
+configured in `.env`; only one run at a time.
+
+The event log next to the control list shows the real pipeline steps
+(extract → verify → score) as they happen — it is **not** simulated
+token-by-token model "thinking." The extraction call itself isn't streamed
+(it's a single structured-output request), so nothing in the live view is
+dramatized beyond what actually occurred.
+
+`http://localhost:8000/index.html` still serves the original Phase 1
+static, read-only viewer over a frozen `workpaper.json` — unaffected by the
+live server.
+
 ## Status
 
-Testing-agent core is working end-to-end: a CLI runs a full control program
-against an evidence set and emits a workpaper (JSON + Markdown) with verified
+Phase 1 (testing-agent core) and Phase 2 (live HITL review loop) are both
+working end-to-end. Phase 1: a CLI runs a full control program against an
+evidence set and emits a workpaper (JSON + Markdown) with verified
 citations, plus a read-only viewer that highlights each cited passage inside
-its source document. The earlier `spike/phase_0_5.py` remains as the original
-proof of the core loop.
+its source document. Phase 2: the same deterministic assess/verify/score
+core, ported into a LangGraph state machine with `MemorySaver` checkpointing,
+driven live over SSE, with a genuine interrupt/resume gate for human
+approve/reject decisions. The earlier `spike/phase_0_5.py` remains as the
+original proof of the core loop.
 
 All sample data is synthetic and clearly fictional — never real client data.

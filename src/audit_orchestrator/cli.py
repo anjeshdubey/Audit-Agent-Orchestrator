@@ -84,6 +84,14 @@ def _run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _serve(args: argparse.Namespace) -> int:
+    load_dotenv()
+    import uvicorn
+
+    uvicorn.run("audit_orchestrator.server:app", host=args.host, port=args.port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="audit-orchestrator")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -95,6 +103,13 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--markdown", default=None)
     run.add_argument("--engagement", default=None)
     run.set_defaults(func=_run)
+
+    serve = sub.add_parser(
+        "serve", help="Run the Phase 2 live engagement demo server (API + viewer)."
+    )
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.set_defaults(func=_serve)
 
     args = parser.parse_args(argv)
     return args.func(args)

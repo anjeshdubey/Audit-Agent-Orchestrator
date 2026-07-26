@@ -21,6 +21,7 @@ gemini = ["google-genai>=0.3"]
 together = ["openai>=1.40"]
 anthropic = ["anthropic>=0.40"]
 all = ["groq>=0.11", "google-genai>=0.3", "openai>=1.40", "anthropic>=0.40"]
+server = ["fastapi>=0.115", "uvicorn[standard]>=0.30", "langgraph>=0.2"]
 
 [build-system]
 requires = ["setuptools>=68"]
