@@ -15,18 +15,31 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Command
 from pydantic import BaseModel
+
+# Origins allowed to call the API cross-origin -- the GitHub Pages viewer is
+# served from a different origin than this API when deployed on Modal.
+# Override/extend with a comma-separated ALLOWED_ORIGINS env var.
+DEFAULT_ALLOWED_ORIGINS = [
+    "https://anjeshdubey.github.io",
+    "https://anjesh.ai",
+    "http://anjesh.ai",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 from .engine import assemble_workpaper
 from .gateway import GatewayConfig
@@ -148,6 +161,16 @@ async def _drive_run(run: Run) -> None:
 
 
 app = FastAPI(title="Audit Orchestrator — Live Demo")
+
+_extra_origins = [
+    o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=DEFAULT_ALLOWED_ORIGINS + _extra_origins,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
 
 
 @app.post("/api/runs")

@@ -1,5 +1,9 @@
 # audit-orchestrator
 
+**[Try the live demo →](https://anjeshdubey.github.io/Audit-Agent-Orchestrator/live.html)**
+Static viewer on GitHub Pages, real LLM calls on a Modal-hosted API — see
+[Deploying](#deploying) for how the two are wired together.
+
 A grounded, human-in-the-loop agent for **compliance evidence review**. Give it
 a list of controls (a SOC 2-style checklist) and a set of policy documents, and
 it answers each control with a **verdict, a confidence score, and a citation to
@@ -95,6 +99,44 @@ dramatized beyond what actually occurred.
 `http://localhost:8000/index.html` still serves the original Phase 1
 static, read-only viewer over a frozen `workpaper.json` — unaffected by the
 live server.
+
+## Deploying
+
+The public demo splits the single local process across two hosts, since
+GitHub Pages only serves static files and can't run the FastAPI/LangGraph
+backend:
+
+```
+anjeshdubey.github.io/Audit-Agent-Orchestrator/  (viewer/, static)
+        │  fetch + SSE, cross-origin (CORS)
+        ▼
+*.modal.run  (FastAPI + LangGraph, single pinned container)
+```
+
+- **API → Modal.** `modal_app.py` runs `audit_orchestrator.server:app` as a
+  Modal ASGI web endpoint, pinned to `max_containers=1` — the server keeps
+  run state (`RUNS`, `_active_run_id`) in a process-global dict, so a second
+  container would silently split traffic and corrupt whichever engagement a
+  browser is watching. Provider keys live in a Modal Secret, not the image:
+  ```bash
+  modal secret create audit-orchestrator-secrets --from-dotenv .env --force
+  modal deploy modal_app.py
+  ```
+  Redeploy after any change under `src/`, `sample/`, or `viewer/` (the image
+  bundles all three) — a redeploy also resets any stuck in-memory run state.
+
+- **Viewer → GitHub Pages.** `.github/workflows/pages.yml` publishes
+  `viewer/` to Pages on every push to `main` that touches it. `viewer/config.js`
+  picks the API base URL at load time: relative paths (same-origin) on
+  `localhost`/`127.0.0.1`, the Modal URL everywhere else — including the
+  `anjesh.ai` custom domain GitHub cascades to project-page subpaths.
+  `server.py`'s `DEFAULT_ALLOWED_ORIGINS` CORS list has to match; override or
+  extend it with a comma-separated `ALLOWED_ORIGINS` env var on the Modal
+  function without a code change.
+
+- Only one engagement runs at a time, globally, across every visitor — by
+  design, matching the rest of this project's no-DB, no-multi-tenant posture.
+  A second visitor mid-run gets a 409 until the first run finishes.
 
 ## Status
 

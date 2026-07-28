@@ -57,7 +57,7 @@ function attachReviewPanel(row, controlId) {
     panel.querySelectorAll("button").forEach((b) => (b.disabled = true));
     const note = panel.querySelector("textarea").value.trim() || null;
     const res = await fetch(
-      `/api/runs/${runId}/controls/${encodeURIComponent(controlId)}/decision`,
+      `${window.AUDIT_API_BASE}/api/runs/${runId}/controls/${encodeURIComponent(controlId)}/decision`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,7 +128,7 @@ async function start() {
   const app = document.getElementById("app");
   app.innerHTML = `<p class="loading">Starting engagement…</p>`;
 
-  const startRes = await fetch("/api/runs", { method: "POST" });
+  const startRes = await fetch(`${window.AUDIT_API_BASE}/api/runs`, { method: "POST" });
   if (!startRes.ok) {
     const detail = await startRes.json().catch(() => ({}));
     app.innerHTML = `<p class="none">Could not start a run (${esc(
@@ -138,7 +138,9 @@ async function start() {
   }
   ({ run_id: runId } = await startRes.json());
 
-  const wp = await fetch(`/api/runs/${runId}/workpaper`).then((r) => r.json());
+  const wp = await fetch(`${window.AUDIT_API_BASE}/api/runs/${runId}/workpaper`).then((r) =>
+    r.json()
+  );
   docs = wp.evidence_documents || {};
 
   layout();
@@ -147,7 +149,7 @@ async function start() {
   scope.textContent = wp.scope_note;
   document.getElementById("app").insertBefore(scope, document.getElementById("log"));
 
-  source = new EventSource(`/api/runs/${runId}/events`);
+  source = new EventSource(`${window.AUDIT_API_BASE}/api/runs/${runId}/events`);
   source.onmessage = (msg) => handleEvent(JSON.parse(msg.data));
   source.onerror = () => logLine("Connection to the run's event stream dropped.", "log-review");
 }
