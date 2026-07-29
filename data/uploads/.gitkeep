@@ -1,0 +1,7 @@
+# data/uploads/ — Phase 3 document intake store
+#
+# Uploaded policy documents are written here as <uuid>.json files by
+# src/audit_orchestrator/intake/ingestor.py.
+#
+# Files older than 30 days are purged by cleanup_old_uploads().
+# This directory is gitignored (see .gitignore) except for this marker file.

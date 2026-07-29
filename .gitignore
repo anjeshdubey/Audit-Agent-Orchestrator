@@ -23,3 +23,6 @@ venv/
 # Local scratch output
 *.local.json
 out/
+
+# Phase 3 intake uploads — store locally, never commit
+data/uploads/*.json

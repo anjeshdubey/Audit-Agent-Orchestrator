@@ -1,0 +1,156 @@
+openapi: "3.1.0"
+
+info:
+  title: Audit Orchestrator — Intake API
+  version: "0.3.0"
+  description: |
+    Phase 3 addition to the Audit Agent Orchestrator.
+    Accepts policy documents over HTTP, validates them, sanitises markup,
+    and stores them for use in a subsequent audit run.
+
+servers:
+  - url: http://localhost:8000
+    description: Local dev (audit-orchestrator serve)
+  - url: https://<modal-app>.modal.run
+    description: Modal.com deployment (modal deploy modal_app.py)
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Shared secret set via the INTAKE_API_KEY environment variable.
+        Omit the header (or leave INTAKE_API_KEY blank) to disable auth
+        in local development.
+
+  schemas:
+    DocumentUpload:
+      type: object
+      required: [title, text]
+      properties:
+        id:
+          type: string
+          description: >
+            Optional caller-supplied document ID. If absent, the server
+            generates a UUID4 hex string.
+          example: "policy-access-control-v3"
+        title:
+          type: string
+          minLength: 1
+          description: Human-readable document title.
+          example: "Access Control Policy"
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1048576   # 1 MB of UTF-8 text
+          description: Full raw text of the policy document (HTML/XML tags stripped server-side).
+          example: "All employees must use multi-factor authentication..."
+        source_url:
+          type: string
+          format: uri
+          description: Original URL the document was sourced from.
+          example: "https://wiki.example.com/policies/access-control"
+
+    IntakeRequest:
+      type: object
+      required: [engagement, documents]
+      properties:
+        engagement:
+          type: string
+          minLength: 1
+          description: Engagement / client identifier (e.g. "northwind-2026").
+          example: "northwind-2026"
+        documents:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/DocumentUpload"
+          description: One or more policy documents. All titles must be unique within the request.
+
+    IntakeResponse:
+      type: object
+      properties:
+        intake_id:
+          type: string
+          description: 12-hex-char ID for this intake batch.
+          example: "a3f9b1c20d44"
+        document_ids:
+          type: array
+          items:
+            type: string
+          description: IDs of successfully stored documents (in request order).
+          example: ["policy-access-control-v3", "8e12f3a4b5c6"]
+        stored_paths:
+          type: array
+          items:
+            type: string
+          description: Absolute filesystem paths of the stored JSON files.
+          example: ["/app/data/uploads/policy-access-control-v3.json"]
+
+    ErrorDetail:
+      type: object
+      properties:
+        detail:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  loc:
+                    type: array
+                    items: {}
+                  msg:
+                    type: string
+                  type:
+                    type: string
+
+paths:
+  /intake:
+    post:
+      operationId: intakeDocuments
+      summary: Upload and validate policy documents
+      description: |
+        Validates, sanitises (strips HTML/XML markup), and persists one or more
+        policy documents to `data/uploads/<uuid>.json`.  Returns a batch
+        `intake_id` and the list of stored document IDs.
+
+        **Auth**: send `X-API-Key: <secret>` matching the `INTAKE_API_KEY`
+        environment variable.  Leave `INTAKE_API_KEY` empty to disable auth
+        in local development.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IntakeRequest"
+            example:
+              engagement: "northwind-2026"
+              documents:
+                - title: "Access Control Policy"
+                  text: "All employees must use MFA when accessing systems..."
+                  source_url: "https://wiki.example.com/policies/access-control"
+      responses:
+        "200":
+          description: All documents validated and stored successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntakeResponse"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+        "422":
+          description: Validation error (missing fields, size exceeded, duplicate titles, etc.).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
