@@ -9,7 +9,7 @@ Schema rules (task 3.4):
   - Size ceiling   : MAX_DOCUMENT_BYTES (default 1 MB) applied to `text`.
   - Markup strip   : basic HTML/XML tags stripped from `text` before storage.
 
-Validation errors are returned as structured payloads — see IntakeError.
+Validation errors are returned as FastAPI's standard 422 response bodies.
 """
 
 from __future__ import annotations
@@ -91,17 +91,6 @@ class StoredDocument(BaseModel):
     source_url: Optional[str]
     uploaded_at: datetime
 
-
-# ---------------------------------------------------------------------------
-# Error response
-# ---------------------------------------------------------------------------
-
-
-class IntakeError(BaseModel):
-    """Structured validation-error payload returned on 422."""
-
-    field: str
-    message: str
 
 
 # ---------------------------------------------------------------------------

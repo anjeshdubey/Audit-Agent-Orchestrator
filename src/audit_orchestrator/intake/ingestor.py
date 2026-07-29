@@ -22,10 +22,15 @@ RETENTION_DAYS = 30
 def _upload_dir() -> Path:
     """Return the upload directory, creating it if necessary.
 
-    Resolves to ``<repo_root>/data/uploads/``.  The repo root is the directory
-    that contains the ``src/`` package tree.
+    Resolves to ``<repo_root>/data/uploads/``.  The repo root is the
+    grandparent of ``src/`` — i.e. parents[3] from this file's location:
+
+      ingestor.py           → parents[0] = intake/
+      intake/               → parents[1] = audit_orchestrator/
+      audit_orchestrator/   → parents[2] = src/
+      src/                  → parents[3] = repo_root/
     """
-    repo_root = Path(__file__).resolve().parents[4]
+    repo_root = Path(__file__).resolve().parents[3]
     upload_dir = repo_root / "data" / "uploads"
     upload_dir.mkdir(parents=True, exist_ok=True)
     return upload_dir

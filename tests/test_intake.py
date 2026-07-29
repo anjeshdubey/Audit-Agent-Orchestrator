@@ -159,19 +159,12 @@ class TestPersistAndLoad:
         with patch(
             "audit_orchestrator.intake.ingestor._upload_dir", return_value=tmp_path
         ):
-            path = persist_document(doc)
-            assert path.exists()
-
-            loaded = load_document.__wrapped__(doc_id) if hasattr(load_document, "__wrapped__") else None
-
-            # Re-implement load inline against tmp_path
-            stored = StoredDocument.model_validate_json(
-                (tmp_path / f"{doc_id}.json").read_text()
-            )
+            persist_document(doc)
+            stored = load_document(doc_id)
 
         assert stored.id == doc_id
         assert stored.title == "Round Trip Policy"
-        assert stored.text == "text"  # markup stripped
+        assert stored.text == "text"  # markup stripped by validate_and_sanitise
 
     def test_load_missing_raises(self, tmp_path):
         with patch(
@@ -189,8 +182,6 @@ class TestCleanupOldUploads:
 
         old_id = uuid.uuid4().hex
         old_doc = validate_and_sanitise(DocumentUpload(title="Old", text="old"), old_id)
-        # Manually backdate uploaded_at
-        from datetime import datetime, timedelta, timezone
         old_doc = old_doc.model_copy(
             update={"uploaded_at": datetime.now(timezone.utc) - timedelta(days=31)}
         )
@@ -255,6 +246,7 @@ class TestIntakeEndpoint:
         body = resp.json()
         assert "intake_id" in body
         assert len(body["document_ids"]) == 2
+        assert "stored_paths" not in body  # server-side paths are not exposed
         assert len(list(tmp_path.glob("*.json"))) == 2
 
     def test_markup_stripped_in_stored_doc(self, intake_client):
@@ -412,3 +404,21 @@ class TestLoadEvidenceFromPaths:
         p.write_text(json.dumps({"not_text": "value"}))
         with pytest.raises(ValueError, match="missing 'text' key"):
             load_evidence_from_paths([p])
+
+
+class TestLoadEvidenceFromIntakeIds:
+    def test_empty_list_raises(self):
+        """An empty ID list should raise immediately, not return an empty dict."""
+        from audit_orchestrator.program import load_evidence_from_intake_ids
+
+        with pytest.raises(ValueError, match="At least one"):
+            load_evidence_from_intake_ids([])
+
+    def test_unknown_id_raises_file_not_found(self, tmp_path):
+        from audit_orchestrator.program import load_evidence_from_intake_ids
+
+        with patch(
+            "audit_orchestrator.intake.ingestor._upload_dir", return_value=tmp_path
+        ):
+            with pytest.raises(FileNotFoundError):
+                load_evidence_from_intake_ids(["nonexistent-id"])

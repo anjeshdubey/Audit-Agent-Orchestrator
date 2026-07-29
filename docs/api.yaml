@@ -47,8 +47,11 @@ components:
         text:
           type: string
           minLength: 1
-          maxLength: 1048576   # 1 MB of UTF-8 text
-          description: Full raw text of the policy document (HTML/XML tags stripped server-side).
+          description: |
+            Full raw text of the policy document (HTML/XML tags stripped server-side).
+            Size limit: 1 048 576 UTF-8 bytes (≈1 MB). Note: the server enforces
+            a UTF-8 *byte* limit, not a character count — `maxLength` is not used
+            here because OpenAPI `maxLength` counts Unicode scalar values, not bytes.
           example: "All employees must use multi-factor authentication..."
         source_url:
           type: string

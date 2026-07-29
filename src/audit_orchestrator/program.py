@@ -84,12 +84,13 @@ def load_evidence_from_intake_ids(intake_ids: list[str]) -> dict[str, str]:
     --intake-id``: it resolves IDs → paths and delegates to
     :func:`load_evidence_from_paths`.
     """
+    if not intake_ids:
+        raise ValueError("At least one intake document ID is required.")
+
     from .intake.ingestor import load_document
 
     docs: dict[str, str] = {}
     for doc_id in intake_ids:
         stored = load_document(doc_id)
         docs[stored.title] = stored.text
-    if not docs:
-        raise ValueError("No intake documents found for the provided IDs.")
     return docs

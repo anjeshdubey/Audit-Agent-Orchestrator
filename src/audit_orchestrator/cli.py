@@ -61,7 +61,11 @@ def _run(args: argparse.Namespace) -> int:
             return 1
         engagement = args.engagement or "intake-run"
     else:
-        docs = load_evidence(args.evidence)
+        try:
+            docs = load_evidence(args.evidence)
+        except (ValueError, FileNotFoundError) as e:
+            print(f"\nEvidence directory error: {e}", file=sys.stderr)
+            return 1
         engagement = args.engagement or Path(args.evidence).name
 
     print(f"Running {len(controls)} controls against {len(docs)} documents...\n")

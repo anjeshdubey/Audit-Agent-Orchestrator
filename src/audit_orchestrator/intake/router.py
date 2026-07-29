@@ -55,9 +55,11 @@ class IntakeResponse(BaseModel):
     intake_id: str
     """Unique identifier for this intake batch."""
     document_ids: list[str]
-    """IDs of successfully stored documents (in request order)."""
-    stored_paths: list[str]
-    """Filesystem paths of the stored JSON files (relative to repo root)."""
+    """IDs of successfully stored documents (in request order).
+
+    Pass these to ``audit-orchestrator run --intake-id`` to replay the
+    uploaded documents locally for debugging.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -82,17 +84,14 @@ async def intake_documents(
     """
     intake_id = uuid.uuid4().hex[:12]
     document_ids: list[str] = []
-    stored_paths: list[str] = []
 
     for doc_upload in body.documents:
         doc_id = doc_upload.id or uuid.uuid4().hex
         stored: StoredDocument = validate_and_sanitise(doc_upload, doc_id)
-        path = persist_document(stored)
+        persist_document(stored)
         document_ids.append(doc_id)
-        stored_paths.append(str(path))
 
     return IntakeResponse(
         intake_id=intake_id,
         document_ids=document_ids,
-        stored_paths=stored_paths,
     )
