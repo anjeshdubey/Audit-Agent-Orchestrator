@@ -5,7 +5,7 @@
 
 ---
 
-## ⚡ Executive Summary for Hiring Managers & Engineering Leads
+## ⚡ Executive Summary & System Overview
 
 **Audit Orchestrator** is an enterprise AI engine designed for **compliance design and documentation testing** (e.g., SOC 2, ISO 27001). 
 
