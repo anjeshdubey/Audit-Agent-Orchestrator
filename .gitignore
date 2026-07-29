@@ -26,6 +26,7 @@ out/
 
 # MkDocs build directory
 site/
+viewer/engineering/
 
 # Phase 3 intake uploads — store locally, never commit
 data/uploads/*.json
