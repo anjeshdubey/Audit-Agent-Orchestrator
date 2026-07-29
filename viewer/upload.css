@@ -1,0 +1,347 @@
+/* ── Upload page styles ────────────────────────────────────────────────────
+   Extends style.css (which is always loaded first). All CSS variables come
+   from that file's :root block.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Cards ------------------------------------------------------------------ */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+}
+
+.step-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.optional-badge {
+  font-size: 0.65rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 7px;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* Inputs ----------------------------------------------------------------- */
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.text-input {
+  width: 100%;
+  font: inherit;
+  font-size: 0.92rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.text-input:focus { border-color: var(--accent); }
+.text-input::placeholder { color: var(--muted); opacity: 0.6; }
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+.hint code {
+  background: var(--panel-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85em;
+}
+
+/* Add-document button ---------------------------------------------------- */
+.add-btn {
+  margin-top: 12px;
+  width: 100%;
+  justify-content: center;
+  font-size: 0.88rem;
+  padding: 9px;
+  border-style: dashed;
+  transition: border-color 0.15s, color 0.15s;
+}
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Individual document slot ----------------------------------------------- */
+.doc-slot {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+  background: var(--bg);
+  position: relative;
+  transition: border-color 0.15s;
+}
+.doc-slot:focus-within { border-color: var(--accent); }
+
+.doc-slot-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.doc-number {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: none;
+}
+.doc-title-input {
+  flex: 1;
+}
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 1;
+  font-size: 1rem;
+  transition: color 0.15s, background 0.15s;
+  flex: none;
+}
+.remove-btn:hover { color: var(--red); background: rgba(248,81,73,0.1); }
+
+/* Drop zone / textarea --------------------------------------------------- */
+.drop-zone {
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+  min-height: 110px;
+  cursor: text;
+}
+.drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(88,166,255,0.06);
+}
+.drop-zone.has-content { border-style: solid; }
+
+.doc-textarea {
+  width: 100%;
+  min-height: 110px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  outline: none;
+  padding: 12px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.doc-textarea::placeholder { color: var(--muted); opacity: 0.5; }
+
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  opacity: 1;
+  transition: opacity 0.1s;
+}
+.drop-overlay svg { opacity: 0.4; }
+.drop-zone.has-content .drop-overlay { opacity: 0; }
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  color: var(--text);
+}
+.file-pill button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.file-pill button:hover { color: var(--red); }
+
+.char-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 4px;
+}
+.char-count.warn { color: var(--amber); }
+.char-count.over { color: var(--red); }
+
+/* Upload actions --------------------------------------------------------- */
+.upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 6px 0 20px;
+}
+#upload-status {
+  font-size: 0.85rem;
+  color: var(--muted);
+  flex: 1;
+}
+#upload-status.error { color: var(--red); }
+#upload-status.success { color: var(--green); }
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Result panel ----------------------------------------------------------- */
+.result-card {
+  border-color: var(--green);
+  animation: fadeSlideIn 0.3s ease;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 18px;
+}
+.check-icon { width: 22px; height: 22px; flex: none; }
+
+.mono-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 6px 10px;
+  word-break: break-all;
+}
+
+.doc-id-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.doc-id-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  flex: none;
+  min-width: 90px;
+}
+.doc-id-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+  word-break: break-all;
+  flex: 1;
+}
+
+/* CLI command block */
+.cmd-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.cmd-block code {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  flex: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--accent); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.hidden { display: none !important; }
+
+/* Validation inline errors */
+.inline-error {
+  font-size: 0.78rem;
+  color: var(--red);
+  margin-top: 4px;
+  display: none;
+}
+.inline-error.visible { display: block; }
+.text-input.invalid, .doc-textarea.invalid { border-color: var(--red); }

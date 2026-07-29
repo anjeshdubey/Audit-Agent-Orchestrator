@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Documents — Audit Orchestrator</title>
+  <meta name="description" content="Upload policy documents to the Audit Orchestrator intake API for evidence review." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="upload.css" />
+</head>
+<body>
+  <header>
+    <h1>Upload Policy Documents</h1>
+    <p class="tagline">
+      Add your policy documents here. Each one is validated, markup-stripped,
+      and stored — then you can run the assessment engine against them.
+    </p>
+    <p class="nav">
+      <a href="index.html">← Live demo</a>
+      &ensp;·&ensp;
+      <a href="workpaper.html">Static workpaper viewer</a>
+    </p>
+  </header>
+
+  <main id="app">
+
+    <!-- ── Step 1: Engagement name ─────────────────────────────── -->
+    <section class="card" id="section-engagement">
+      <div class="step-label">Step 1 — Engagement</div>
+      <label for="engagement-input" class="field-label">Engagement name</label>
+      <input
+        id="engagement-input"
+        type="text"
+        class="text-input"
+        placeholder="e.g. acme-corp-soc2-2026"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <p class="hint">A short identifier for this audit run. Letters, numbers and hyphens work well.</p>
+    </section>
+
+    <!-- ── Step 2: Document list ───────────────────────────────── -->
+    <section class="card" id="section-docs">
+      <div class="step-label">Step 2 — Documents</div>
+      <div id="doc-list"></div>
+      <button class="btn ghost add-btn" id="add-doc">+ Add document</button>
+    </section>
+
+    <!-- ── Step 3: API key (optional) ─────────────────────────── -->
+    <section class="card" id="section-auth">
+      <div class="step-label">Step 3 — Auth <span class="optional-badge">optional</span></div>
+      <label for="api-key-input" class="field-label">API key</label>
+      <input
+        id="api-key-input"
+        type="password"
+        class="text-input"
+        placeholder="Leave blank if INTAKE_API_KEY is not set on the server"
+        autocomplete="off"
+      />
+      <p class="hint">Matches the <code>INTAKE_API_KEY</code> env var on the server. Leave empty for local dev.</p>
+    </section>
+
+    <!-- ── Upload button + status ─────────────────────────────── -->
+    <div class="upload-actions">
+      <button class="btn" id="upload-btn">Upload documents</button>
+      <div id="upload-status"></div>
+    </div>
+
+    <!-- ── Result panel (shown after success) ─────────────────── -->
+    <section class="card result-card hidden" id="result-panel">
+      <div class="result-header">
+        <svg class="check-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="9" stroke="var(--green)" stroke-width="1.5"/>
+          <path d="M6 10l3 3 5-5" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="result-title">Documents uploaded</span>
+      </div>
+
+      <div class="field">
+        <div class="label">Intake batch ID</div>
+        <div class="mono-value" id="result-intake-id"></div>
+      </div>
+
+      <div class="field">
+        <div class="label">Document IDs</div>
+        <div id="result-doc-ids"></div>
+      </div>
+
+      <div class="field">
+        <div class="label">Run assessment via CLI</div>
+        <div class="cmd-block">
+          <code id="cli-cmd"></code>
+          <button class="copy-btn" id="copy-btn" title="Copy to clipboard">
+            <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
+              <path d="M4 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6z"/>
+              <path d="M2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-1H2V6a1 1 0 0 0-1-1z"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" id="go-live-btn">Start live assessment →</button>
+        <button class="btn ghost" id="upload-more-btn">Upload more documents</button>
+      </div>
+      <p class="hint" id="go-live-hint">
+        Starts the assessment run immediately on the server against the uploaded documents.
+        The live viewer will open automatically.
+      </p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>
+      Documents are validated, HTML/XML markup stripped, and stored in
+      <code>data/uploads/</code> — never committed to the repo. Files older than
+      30 days are automatically purged. See
+      <a href="../docs/api.yaml" target="_blank" rel="noopener">docs/api.yaml</a>
+      for the full API spec.
+    </p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="upload.js"></script>
+</body>
+</html>
