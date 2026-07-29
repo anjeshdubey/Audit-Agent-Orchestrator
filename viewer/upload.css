@@ -344,4 +344,6 @@
   display: none;
 }
 .inline-error.visible { display: block; }
-.text-input.invalid, .doc-textarea.invalid { border-color: var(--red); }
+.text-input.invalid { border-color: var(--red); }
+/* Drop-zone border (not the textarea which has border:none) */
+.drop-zone.dz-invalid { border-color: var(--red); border-style: solid; }

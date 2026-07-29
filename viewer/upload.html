@@ -101,12 +101,12 @@
       </div>
 
       <div class="result-actions">
-        <button class="btn" id="go-live-btn">Start live assessment →</button>
+        <button class="btn" id="go-live-btn">Go to live viewer →</button>
         <button class="btn ghost" id="upload-more-btn">Upload more documents</button>
       </div>
       <p class="hint" id="go-live-hint">
-        Starts the assessment run immediately on the server against the uploaded documents.
-        The live viewer will open automatically.
+        Opens the live assessment viewer. To run the engine against these
+        specific documents, use the CLI command above with <code>--intake-id</code>.
       </p>
     </section>
 
@@ -116,9 +116,7 @@
     <p>
       Documents are validated, HTML/XML markup stripped, and stored in
       <code>data/uploads/</code> — never committed to the repo. Files older than
-      30 days are automatically purged. See
-      <a href="../docs/api.yaml" target="_blank" rel="noopener">docs/api.yaml</a>
-      for the full API spec.
+      30 days are automatically purged.
     </p>
   </footer>
 

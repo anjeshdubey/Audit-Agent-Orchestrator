@@ -7,13 +7,16 @@
 //      - Batch intake_id
 //      - Per-document IDs (with titles)
 //      - Ready-to-paste CLI command
-//      - "Start live assessment" button (POSTs /api/runs, then opens index.html)
+//      - "Start live assessment" button (goes to index.html — note: /api/runs
+//        always runs the server-side program; the uploaded docs provide context
+//        for that run via the CLI --intake-id flag shown in the result panel)
 
 const MAX_BYTES = 1_048_576; // must match server MAX_DOCUMENT_BYTES
 
-// ── Document slot management ────────────────────────────────────────────────
-
+// Monotonic counter — never reset so IDs remain unique even after "Upload more".
 let docCount = 0;
+
+// ── Document slot management ────────────────────────────────────────────────
 
 function makeDocSlot() {
   docCount++;
@@ -24,7 +27,7 @@ function makeDocSlot() {
 
   slot.innerHTML = `
     <div class="doc-slot-header">
-      <span class="doc-number">Doc ${idx}</span>
+      <span class="doc-number">Doc 1</span>
       <input
         class="text-input doc-title-input"
         type="text"
@@ -33,7 +36,7 @@ function makeDocSlot() {
         spellcheck="false"
         id="doc-title-${idx}"
       />
-      <button class="remove-btn" title="Remove document" aria-label="Remove document ${idx}">✕</button>
+      <button class="remove-btn" title="Remove document" aria-label="Remove document">✕</button>
     </div>
 
     <div class="drop-zone" id="drop-zone-${idx}">
@@ -41,7 +44,7 @@ function makeDocSlot() {
         class="doc-textarea"
         placeholder="Paste policy text here…"
         id="doc-text-${idx}"
-        aria-label="Document text for doc ${idx}"
+        aria-label="Document text"
       ></textarea>
       <div class="drop-overlay">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -53,8 +56,8 @@ function makeDocSlot() {
     </div>
     <div class="char-count" id="char-count-${idx}">0 / 1 MB</div>
     <div class="file-row" id="file-row-${idx}"></div>
-    <div class="inline-error" id="err-title-${idx}">Title is required.</div>
-    <div class="inline-error" id="err-text-${idx}">Document text is required.</div>
+    <div class="inline-error" id="err-title-${idx}"></div>
+    <div class="inline-error" id="err-text-${idx}"></div>
   `;
 
   // Remove button
@@ -63,25 +66,25 @@ function makeDocSlot() {
     renumberSlots();
   });
 
-  // Char counter
+  // Char counter + has-content toggle
   const textarea = slot.querySelector(".doc-textarea");
   const counter  = slot.querySelector(`#char-count-${idx}`);
+  const dropZone = slot.querySelector(`#drop-zone-${idx}`);
   textarea.addEventListener("input", () => {
     updateCharCount(textarea, counter);
-    if (textarea.value.trim()) {
-      slot.querySelector(`#drop-zone-${idx}`).classList.add("has-content");
-    } else {
-      slot.querySelector(`#drop-zone-${idx}`).classList.remove("has-content");
-    }
+    dropZone.classList.toggle("has-content", textarea.value.trim().length > 0);
   });
 
-  // Drag-and-drop
-  const dropZone = slot.querySelector(`#drop-zone-${idx}`);
+  // Drag-and-drop — use relatedTarget to avoid flicker on child elements
   dropZone.addEventListener("dragover", (e) => {
     e.preventDefault();
     dropZone.classList.add("drag-over");
   });
-  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+  dropZone.addEventListener("dragleave", (e) => {
+    if (!dropZone.contains(e.relatedTarget)) {
+      dropZone.classList.remove("drag-over");
+    }
+  });
   dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropZone.classList.remove("drag-over");
@@ -115,15 +118,21 @@ function loadFile(file, slot, idx) {
   const allowed = [".txt", ".md"];
   const ok = allowed.some((ext) => file.name.toLowerCase().endsWith(ext));
   if (!ok) {
-    setStatus(`Only .txt and .md files are supported (got "${file.name}").`, "error");
+    setStatus(`Only .txt and .md files are supported (got "${esc(file.name)}").`, "error");
     return;
   }
+
   const reader = new FileReader();
+
+  reader.onerror = () => {
+    setStatus(`Could not read "${esc(file.name)}" — the file may be unreadable.`, "error");
+  };
+
   reader.onload = (e) => {
-    const textarea = slot.querySelector(`#doc-text-${idx}`);
-    const counter  = slot.querySelector(`#char-count-${idx}`);
-    const dropZone = slot.querySelector(`#drop-zone-${idx}`);
-    const fileRow  = slot.querySelector(`#file-row-${idx}`);
+    const textarea  = slot.querySelector(`#doc-text-${idx}`);
+    const counter   = slot.querySelector(`#char-count-${idx}`);
+    const dropZone  = slot.querySelector(`#drop-zone-${idx}`);
+    const fileRow   = slot.querySelector(`#file-row-${idx}`);
     const titleInput = slot.querySelector(`#doc-title-${idx}`);
 
     textarea.value = e.target.result;
@@ -154,10 +163,20 @@ function loadFile(file, slot, idx) {
     });
     fileRow.appendChild(pill);
   };
+
   reader.readAsText(file);
 }
 
 // ── Validation ──────────────────────────────────────────────────────────────
+
+function showFieldError(el, msg) {
+  el.textContent = msg;
+  el.classList.add("visible");
+}
+function clearFieldError(el) {
+  el.textContent = "";
+  el.classList.remove("visible");
+}
 
 function validateForm() {
   let valid = true;
@@ -167,11 +186,11 @@ function validateForm() {
   const engErr   = document.getElementById("err-engagement");
   if (!engInput.value.trim()) {
     engInput.classList.add("invalid");
-    if (engErr) { engErr.textContent = "Engagement name is required."; engErr.classList.add("visible"); }
+    showFieldError(engErr, "Engagement name is required.");
     valid = false;
   } else {
     engInput.classList.remove("invalid");
-    if (engErr) engErr.classList.remove("visible");
+    clearFieldError(engErr);
   }
 
   // Documents
@@ -181,48 +200,47 @@ function validateForm() {
     return false;
   }
 
-  const titles = new Set();
+  const seenTitles = new Set();
   slots.forEach((slot) => {
-    const idx       = slot.dataset.idx;
-    const titleEl   = slot.querySelector(`#doc-title-${idx}`);
-    const textEl    = slot.querySelector(`#doc-text-${idx}`);
-    const errTitle  = slot.querySelector(`#err-title-${idx}`);
-    const errText   = slot.querySelector(`#err-text-${idx}`);
+    const idx      = slot.dataset.idx;
+    const titleEl  = slot.querySelector(`#doc-title-${idx}`);
+    const textEl   = slot.querySelector(`#doc-text-${idx}`);
+    const dropZone = slot.querySelector(`#drop-zone-${idx}`);
+    const errTitle = slot.querySelector(`#err-title-${idx}`);
+    const errText  = slot.querySelector(`#err-text-${idx}`);
 
     const title = titleEl.value.trim();
-    const text  = textEl.value.trim();
+    // Use trimmed text for the required check; raw value for byte count
+    const textTrimmed = textEl.value.trim();
     const bytes = new TextEncoder().encode(textEl.value).length;
 
-    // Title
+    // ── Title ──
     if (!title) {
       titleEl.classList.add("invalid");
-      errTitle.classList.add("visible");
+      showFieldError(errTitle, "Title is required.");
       valid = false;
-    } else if (titles.has(title.toLowerCase())) {
+    } else if (seenTitles.has(title.toLowerCase())) {
       titleEl.classList.add("invalid");
-      errTitle.textContent = "Duplicate title — each document must have a unique title.";
-      errTitle.classList.add("visible");
+      showFieldError(errTitle, "Duplicate title — each document must have a unique title.");
       valid = false;
     } else {
       titleEl.classList.remove("invalid");
-      errTitle.classList.remove("visible");
-      titles.add(title.toLowerCase());
+      clearFieldError(errTitle);
+      seenTitles.add(title.toLowerCase());
     }
 
-    // Text
-    if (!text) {
-      textEl.classList.add("invalid");
-      errText.textContent = "Document text is required.";
-      errText.classList.add("visible");
+    // ── Text ──
+    if (!textTrimmed) {
+      dropZone.classList.add("dz-invalid");
+      showFieldError(errText, "Document text is required.");
       valid = false;
     } else if (bytes > MAX_BYTES) {
-      textEl.classList.add("invalid");
-      errText.textContent = `Document exceeds 1 MB limit (${(bytes / MAX_BYTES).toFixed(2)} MB).`;
-      errText.classList.add("visible");
+      dropZone.classList.add("dz-invalid");
+      showFieldError(errText, `Document exceeds 1 MB limit (${(bytes / MAX_BYTES).toFixed(2)} MB).`);
       valid = false;
     } else {
-      textEl.classList.remove("invalid");
-      errText.classList.remove("visible");
+      dropZone.classList.remove("dz-invalid");
+      clearFieldError(errText);
     }
   });
 
@@ -248,6 +266,7 @@ async function upload() {
     const idx = slot.dataset.idx;
     documents.push({
       title: slot.querySelector(`#doc-title-${idx}`).value.trim(),
+      // Send raw value — the server strips markup server-side
       text:  slot.querySelector(`#doc-text-${idx}`).value,
     });
   });
@@ -282,12 +301,14 @@ async function upload() {
     return;
   }
 
-  setStatus("", "success");
+  setStatus("", "");
   uploadBtn.disabled = false;
   showResult(body, documents, engagement);
 }
 
 // ── Result panel ─────────────────────────────────────────────────────────────
+// Uses onclick assignment (not addEventListener) so re-displaying the result
+// panel after "Upload more → upload again" never stacks duplicate handlers.
 
 function showResult(body, documents, engagement) {
   const panel = document.getElementById("result-panel");
@@ -308,60 +329,86 @@ function showResult(body, documents, engagement) {
   });
 
   // CLI command
-  const ids   = body.document_ids.join(" \\\n    ");
-  const cmd   = `audit-orchestrator run \\\n  --intake-id ${ids} \\\n  --engagement ${engagement} \\\n  --markdown out/workpaper.md`;
+  const idArgs = body.document_ids.map((id) => `    ${id}`).join(" \\\n");
+  const cmd    = `audit-orchestrator run \\\n  --intake-id \\\n${idArgs} \\\n  --engagement ${engagement} \\\n  --markdown out/workpaper.md`;
   document.getElementById("cli-cmd").textContent = cmd;
 
   panel.classList.remove("hidden");
   panel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  // Copy button
-  document.getElementById("copy-btn").addEventListener("click", async () => {
-    await navigator.clipboard.writeText(cmd).catch(() => {});
+  // ── Copy button (onclick = no duplicate handlers) ──
+  document.getElementById("copy-btn").onclick = async () => {
     const btn = document.getElementById("copy-btn");
-    btn.classList.add("copied");
-    btn.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> Copied!`;
-    setTimeout(() => {
-      btn.classList.remove("copied");
-      btn.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6z"/><path d="M2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-1H2V6a1 1 0 0 0-1-1z"/></svg> Copy`;
-    }, 2000);
-  });
+    let copied = false;
 
-  // "Start live assessment" — POST /api/runs then redirect to index.html
-  document.getElementById("go-live-btn").addEventListener("click", async () => {
-    const btn = document.getElementById("go-live-btn");
+    // Prefer Clipboard API (requires HTTPS / localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(cmd);
+        copied = true;
+      } catch (_) { /* fall through */ }
+    }
+
+    // Fallback: execCommand for non-secure contexts (plain HTTP deploys)
+    if (!copied) {
+      const ta = document.createElement("textarea");
+      ta.value = cmd;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { copied = document.execCommand("copy"); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+
+    if (copied) {
+      btn.classList.add("copied");
+      btn.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> Copied!`;
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        btn.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6z"/><path d="M2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-1H2V6a1 1 0 0 0-1-1z"/></svg> Copy`;
+      }, 2000);
+    } else {
+      btn.textContent = "Select and copy manually";
+    }
+  };
+
+  // ── Go live (onclick = no duplicate handlers) ──
+  // Note: POST /api/runs starts the server's configured program. The uploaded
+  // document IDs are for use with --intake-id on the CLI (shown above). The
+  // live viewer is useful to confirm the server is running correctly.
+  document.getElementById("go-live-btn").onclick = async () => {
+    const btn  = document.getElementById("go-live-btn");
+    const hint = document.getElementById("go-live-hint");
     btn.disabled = true;
     btn.textContent = "Starting…";
     try {
       const r = await fetch(`${window.AUDIT_API_BASE}/api/runs`, { method: "POST" });
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
-        const msg = d.detail || `HTTP ${r.status}`;
-        document.getElementById("go-live-hint").textContent =
-          `Could not start run: ${msg}`;
+        hint.textContent = `Could not start run: ${d.detail || `HTTP ${r.status}`}`;
         btn.disabled = false;
-        btn.textContent = "Start live assessment →";
+        btn.textContent = "Go to live viewer →";
         return;
       }
-      // Redirect to live viewer
       window.location.href = "index.html";
     } catch (err) {
-      document.getElementById("go-live-hint").textContent =
-        `Network error: ${String(err)}`;
+      hint.textContent = `Network error: ${String(err)}`;
       btn.disabled = false;
-      btn.textContent = "Start live assessment →";
+      btn.textContent = "Go to live viewer →";
     }
-  });
+  };
 
-  // "Upload more" — reset form
-  document.getElementById("upload-more-btn").addEventListener("click", () => {
+  // ── Upload more (onclick = no duplicate handlers) ──
+  document.getElementById("upload-more-btn").onclick = () => {
     panel.classList.add("hidden");
     document.getElementById("doc-list").innerHTML = "";
-    docCount = 0;
+    // docCount is NOT reset — keeps IDs monotonically unique
     addSlot();
+    setStatus("", "");
     document.getElementById("engagement-input").focus();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -375,10 +422,13 @@ function esc(s) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 function addSlot() {
-  document.getElementById("doc-list").appendChild(makeDocSlot());
+  const list = document.getElementById("doc-list");
+  const slot = makeDocSlot();
+  list.appendChild(slot);
+  // Update the "Doc N" label now that we know the real position
+  renumberSlots();
 }
 
-// Inline engagement error span (added dynamically so HTML stays clean)
 function initEngagementError() {
   const input = document.getElementById("engagement-input");
   const err   = document.createElement("div");
@@ -388,14 +438,14 @@ function initEngagementError() {
   input.addEventListener("input", () => {
     if (input.value.trim()) {
       input.classList.remove("invalid");
-      err.classList.remove("visible");
+      clearFieldError(err);
     }
   });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   initEngagementError();
-  addSlot(); // start with one empty slot
+  addSlot();
   document.getElementById("add-doc").addEventListener("click", addSlot);
   document.getElementById("upload-btn").addEventListener("click", upload);
 });
