@@ -38,6 +38,10 @@ image = (
     .add_local_dir("src", remote_path="/root/app/src")
     .add_local_dir("sample", remote_path="/root/app/sample")
     .add_local_dir("viewer", remote_path="/root/app/viewer")
+    # Phase 3: intake upload store. The container writes uploaded documents
+    # here; the directory is created at runtime by ingestor._upload_dir() if
+    # absent, so we only need the mount when replaying existing uploads.
+    .add_local_dir("data", remote_path="/root/app/data")
 )
 
 
