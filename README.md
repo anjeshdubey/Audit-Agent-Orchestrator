@@ -100,6 +100,44 @@ dramatized beyond what actually occurred.
 static, read-only viewer over a frozen `workpaper.json` — unaffected by the
 live server.
 
+### Phase 3 — intake API & CLI replay
+
+With the server running (`audit-orchestrator serve`), you can POST policy
+documents directly rather than placing files in `sample/`:
+
+```bash
+# Upload one or more documents (set INTAKE_API_KEY= in .env to disable auth locally)
+curl -s -X POST http://localhost:8000/intake \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: your-key-here' \
+  -d '{
+    "engagement": "acme-2026",
+    "documents": [
+      {"title": "Access Control Policy", "text": "All employees must use MFA..."},
+      {"title": "Data Retention Policy",  "text": "Logs are kept for 90 days..."}
+    ]
+  }'
+# → {"intake_id": "a3f9b1c20d44", "document_ids": ["<uuid1>", "<uuid2>"], ...}
+```
+
+Then replay the uploaded documents through the CLI for local debugging:
+
+```bash
+audit-orchestrator run \
+  --intake-id <uuid1> <uuid2> \
+  --engagement acme-2026 \
+  --markdown out/workpaper.md
+```
+
+**Auth**: set `INTAKE_API_KEY=<secret>` in `.env`. Leave it blank to disable
+auth in local development. Send the key as `X-API-Key: <secret>` on every
+`POST /intake` request. The full OpenAPI spec is at
+[`docs/api.yaml`](docs/api.yaml).
+
+**Storage**: uploaded documents land in `data/uploads/<uuid>.json` (markup
+stripped, 1 MB ceiling, 30-day automatic cleanup). The directory is
+gitignored — only the `.gitkeep` marker is tracked.
+
 ## Deploying
 
 The public demo splits the single local process across two hosts, since
@@ -140,14 +178,16 @@ anjeshdubey.github.io/Audit-Agent-Orchestrator/  (viewer/, static)
 
 ## Status
 
-Phase 1 (testing-agent core) and Phase 2 (live HITL review loop) are both
-working end-to-end. Phase 1: a CLI runs a full control program against an
-evidence set and emits a workpaper (JSON + Markdown) with verified
+Phases 1–3 are working end-to-end. Phase 1: a CLI runs a full control program
+against an evidence set and emits a workpaper (JSON + Markdown) with verified
 citations, plus a read-only viewer that highlights each cited passage inside
 its source document. Phase 2: the same deterministic assess/verify/score
 core, ported into a LangGraph state machine with `MemorySaver` checkpointing,
 driven live over SSE, with a genuine interrupt/resume gate for human
-approve/reject decisions. The earlier `spike/phase_0_5.py` remains as the
-original proof of the core loop.
+approve/reject decisions. Phase 3: a `POST /intake` API endpoint accepts
+policy documents over HTTP, validates and sanitises them, stores them under
+`data/uploads/`, and makes them replayable via `audit-orchestrator run
+--intake-id`. The earlier `spike/phase_0_5.py` remains as the original proof
+of the core loop.
 
 All sample data is synthetic and clearly fictional — never real client data.

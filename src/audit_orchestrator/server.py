@@ -44,6 +44,7 @@ DEFAULT_ALLOWED_ORIGINS = [
 from .engine import assemble_workpaper
 from .gateway import GatewayConfig
 from .graph import compile_graph, initial_state
+from .intake.router import intake_router
 from .models import Control, ControlAssessment, Workpaper
 from .program import load_evidence, load_program
 
@@ -169,8 +170,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=DEFAULT_ALLOWED_ORIGINS + _extra_origins,
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "X-API-Key"],
 )
+
+# Phase 3: document intake endpoint (POST /intake).
+app.include_router(intake_router)
 
 
 @app.post("/api/runs")

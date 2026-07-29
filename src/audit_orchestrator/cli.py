@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from .engine import run_program
 from .gateway import GatewayError
 from .models import ControlAssessment
-from .program import load_evidence, load_program
+from .program import load_evidence, load_evidence_from_intake_ids, load_program
 from .workpaper import to_markdown
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -45,8 +45,28 @@ def _progress(i: int, total: int, a: ControlAssessment) -> None:
 def _run(args: argparse.Namespace) -> int:
     load_dotenv()
     controls = load_program(args.program)
-    docs = load_evidence(args.evidence)
-    engagement = args.engagement or Path(args.evidence).name
+
+    # Task 3.7: --intake-id lets a caller replay documents that were uploaded
+    # via POST /intake instead of reading from a local evidence directory.
+    if args.intake_id:
+        try:
+            docs = load_evidence_from_intake_ids(args.intake_id)
+        except FileNotFoundError as e:
+            print(f"\nIntake document not found: {e}", file=sys.stderr)
+            print(
+                "Run `audit-orchestrator serve` and POST to /intake first, "
+                "then pass the returned document IDs with --intake-id.",
+                file=sys.stderr,
+            )
+            return 1
+        engagement = args.engagement or "intake-run"
+    else:
+        try:
+            docs = load_evidence(args.evidence)
+        except (ValueError, FileNotFoundError) as e:
+            print(f"\nEvidence directory error: {e}", file=sys.stderr)
+            return 1
+        engagement = args.engagement or Path(args.evidence).name
 
     print(f"Running {len(controls)} controls against {len(docs)} documents...\n")
     try:
@@ -99,6 +119,18 @@ def main(argv: list[str] | None = None) -> int:
     run = sub.add_parser("run", help="Run an engagement and emit a workpaper.")
     run.add_argument("--program", default=str(DEFAULT_PROGRAM))
     run.add_argument("--evidence", default=str(DEFAULT_EVIDENCE))
+    run.add_argument(
+        "--intake-id",
+        dest="intake_id",
+        nargs="+",
+        default=None,
+        metavar="DOC_ID",
+        help=(
+            "One or more document IDs returned by POST /intake. "
+            "When supplied, --evidence is ignored and documents are loaded "
+            "from data/uploads/<id>.json instead."
+        ),
+    )
     run.add_argument("--out", default=str(DEFAULT_OUT))
     run.add_argument("--markdown", default=None)
     run.add_argument("--engagement", default=None)
