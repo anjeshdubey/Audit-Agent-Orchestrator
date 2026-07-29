@@ -241,7 +241,7 @@ async def get_workpaper(run_id: str) -> dict:
     return _build_workpaper(run).model_dump()
 
 
-# Serves the Phase 1 static viewer (index.html/app.js) and the Phase 2 live
-# page (live.html/live.js) from the same process as the API -- one port, no
-# CORS. Mounted last so it doesn't shadow the /api routes above.
+# Serves the Phase 2 live page (index.html/live.js) and the Phase 1 static
+# viewer (workpaper.html/app.js) from the same process as the API -- one
+# port, no CORS. Mounted last so it doesn't shadow the /api routes above.
 app.mount("/", StaticFiles(directory=str(VIEWER_DIR), html=True), name="viewer")

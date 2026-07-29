@@ -3,32 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Audit Orchestrator — Workpaper</title>
+  <title>Audit Orchestrator — Live Demo</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>Audit Orchestrator</h1>
+    <h1>Audit Orchestrator — Live Demo</h1>
     <p class="tagline">
-      Design/documentation testing — every verdict traceable to a
-      <strong>verified</strong> source passage.
+      Watch the agent work a real control list in real time. Anything
+      uncertain or failing lands in front of you before it counts.
     </p>
-    <p class="nav"><a href="live.html">→ Live demo (interactive, human-in-the-loop)</a></p>
+    <p class="nav"><a href="workpaper.html">← Static workpaper viewer</a></p>
   </header>
 
   <main id="app">
-    <p class="loading">Loading workpaper…</p>
+    <p class="loading">
+      <button id="start" class="btn">Start engagement</button>
+    </p>
   </main>
 
   <footer>
     <p>
-      Read-only workpaper viewer. All sample data is synthetic and fictional.
-      Verdict and confidence are derived in code from a verified citation and
-      requirement coverage — not self-reported by the model.
+      This server makes real LLM calls against the Northwind sample
+      engagement using whatever provider is configured in <code>.env</code> —
+      only one run at a time. The event log shows the actual pipeline steps
+      (extract → verify → score), not simulated model "thinking" — the
+      extraction call itself isn't token-streamed, so nothing here is
+      dramatized beyond what really happened.
     </p>
   </footer>
 
+  <script src="config.js"></script>
   <script src="render.js"></script>
-  <script src="app.js"></script>
+  <script src="live.js"></script>
 </body>
 </html>

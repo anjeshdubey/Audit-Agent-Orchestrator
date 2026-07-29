@@ -1,6 +1,6 @@
 # audit-orchestrator
 
-**[Try the live demo →](https://anjeshdubey.github.io/Audit-Agent-Orchestrator/live.html)**
+**[Try the live demo →](https://anjeshdubey.github.io/Audit-Agent-Orchestrator/)**
 Static viewer on GitHub Pages, real LLM calls on a Modal-hosted API — see
 [Deploying](#deploying) for how the two are wired together.
 
@@ -81,7 +81,7 @@ cp .env.example .env                   # set at least one provider key
 audit-orchestrator serve               # http://localhost:8000
 ```
 
-Open `http://localhost:8000/live.html` and click **Start engagement**. Every
+Open `http://localhost:8000` and click **Start engagement**. Every
 control streams in over SSE as it's assessed; anything short of a clean,
 high-confidence `documented` verdict (partial, not-found, or an errored
 extraction) pauses the run at a real LangGraph `interrupt()` and drops into a
@@ -96,7 +96,7 @@ token-by-token model "thinking." The extraction call itself isn't streamed
 (it's a single structured-output request), so nothing in the live view is
 dramatized beyond what actually occurred.
 
-`http://localhost:8000/index.html` still serves the original Phase 1
+`http://localhost:8000/workpaper.html` still serves the original Phase 1
 static, read-only viewer over a frozen `workpaper.json` — unaffected by the
 live server.
 
