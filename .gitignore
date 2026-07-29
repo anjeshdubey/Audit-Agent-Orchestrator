@@ -24,5 +24,8 @@ venv/
 *.local.json
 out/
 
+# MkDocs build directory
+site/
+
 # Phase 3 intake uploads — store locally, never commit
 data/uploads/*.json

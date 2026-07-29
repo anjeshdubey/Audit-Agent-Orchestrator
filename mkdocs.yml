@@ -1,0 +1,71 @@
+site_name: Audit Orchestrator — Engineering Docs
+site_description: Grounded, Human-in-the-Loop Compliance Evidence Review Agent
+site_url: https://anjeshdubey.github.io/Audit-Agent-Orchestrator/
+
+repo_name: anjeshdubey/Audit-Agent-Orchestrator
+repo_url: https://github.com/anjeshdubey/Audit-Agent-Orchestrator
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+
+nav:
+  - Overview: index.md
+  - System Architecture:
+      - High-Level Design: architecture/system-design.md
+      - Core 3-Step Pipeline: architecture/pipeline.md
+      - State Machine & HITL: architecture/state-machine.md
+  - API & Data Specification:
+      - Intake API: api/intake-api.md
+      - SSE & Streaming Protocol: api/events-sse.md
+  - Deep Dives & Operations:
+      - Deterministic Verification: operations/verification-engine.md
+      - Server & Cloud Deployment: operations/deployment.md
+  - Quickstart: quickstart.md
